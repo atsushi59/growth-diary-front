@@ -11,7 +11,7 @@ export default function AppLayout() {
     <div>
       <Outlet />
       <button
-        className="fixed right-6 bottom-6 flex size-14 cursor-pointer items-center justify-center rounded-full bg-blue-600 text-2xl text-white shadow-lg"
+        className="fixed right-6 bottom-6 flex size-14 cursor-pointer items-center justify-center rounded-full bg-primary text-2xl text-primary-foreground shadow-lg"
         type="button"
         aria-label="メニューを開く"
       >
