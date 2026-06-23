@@ -17,6 +17,8 @@ import Vaccinations from './pages/Vaccinations'
 import Growth from './pages/Growth'
 import MyPage from './pages/MyPage'
 import NotFound from './pages/NotFound'
+import PageList from './pages/PageList'
+import DebugPage from './pages/DebugPage'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -40,6 +42,10 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/growth" element={<Growth />} />
           <Route path="/mypage" element={<MyPage />} />
         </Route>
+
+        {/* 検証用（メニューボタンなし・どのレイアウトにも属さない） */}
+        <Route path="/list" element={<PageList />} />
+        <Route path="/debug" element={<DebugPage />} />
 
         {/* 未マッチ */}
         <Route path="*" element={<NotFound />} />
