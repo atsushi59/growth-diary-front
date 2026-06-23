@@ -28,7 +28,7 @@ export default function PageList() {
       {PAGE_LINKS.map((link) => (
         <Link
           key={link.path}
-          className="rounded-lg bg-blue-600 px-4 py-3 text-center text-white hover:bg-blue-700"
+          className="rounded-lg bg-primary px-4 py-3 text-center text-primary-foreground hover:bg-primary-700"
           to={link.path}
         >
           {link.label}

@@ -1,1 +1,54 @@
 @import "tailwindcss";
+
+/* ============================================================
+   カラー定義（app.css相当 / 役割ベースのセマンティックカラー）
+   メインカラー: #0A6E9E（青寄りティール）
+
+   使い方:
+   - bg-primary / text-foreground / border-border のように
+     「役割名」のクラスで色を指定する。
+   - #0A6E9E のような生の色コードや、bg-blue-500 のような
+     Tailwind標準色は使わない（下で標準色を無効化している）。
+   ============================================================ */
+
+@theme {
+  /* --- Tailwind標準の色を全て無効化 --- */
+  /* これにより bg-red-500 等は使えなくなり、下で定義した役割色だけが使える */
+  --color-*: initial;
+
+  /* --- 常に必要な基本色（標準色を消したので明示的に定義し直す） --- */
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  /* === Primary（メインカラー / 主要なアクション） === */
+  --color-primary: #0a6e9e; /* 基準。bg-primary / text-primary で使う */
+  --color-primary-50: #dceff7; /* 薄い背景用（タグ・バッジ・選択中の背景など） */
+  --color-primary-700: #084e72; /* 濃い文字・枠線用（薄い背景の上の文字、枠線ボタンの文字） */
+  --color-primary-foreground: #dceff7; /* primary背景の上に乗せる文字色 */
+
+  /* === Surface（背景） === */
+  --color-surface: #ffffff; /* 基準の背景 */
+  --color-subtle: #f4f8fb; /* surfaceより控えめ。補助エリア等 */
+  --color-muted: #eaf0f4; /* 主張を抑えた背景。disabled等 */
+  --color-accent: #eaf0f4; /* hoverなどやや目立たせたい背景 */
+
+  /* === Foreground（テキスト・アイコン） === */
+  --color-foreground: #171d21; /* 基準の文字色 */
+  --color-muted-foreground: #566066; /* プレースホルダ等、主張を抑えた文字 */
+  --color-subtle-foreground: #889399; /* 補足説明など最も弱い文字 */
+
+  /* === Border === */
+  --color-border: #eaf0f4; /* 基準のボーダー */
+  --color-input: #d6dfe5; /* フォーム要素のボーダー */
+  --color-ring: #0a6e9e; /* フォーカスリング */
+
+  /* === Function（機能色。意味が伝わることを優先） === */
+  --color-destructive: #dc2626; /* 削除など破壊的アクション */
+  --color-destructive-foreground: #fef2f2;
+  --color-success: #15a34a; /* 成功・完了 */
+  --color-success-foreground: #f0fdf4;
+  --color-warning: #e8a91d; /* 警告・注意 */
+  --color-warning-foreground: #452f03;
+}

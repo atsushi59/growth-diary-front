@@ -24,7 +24,7 @@ export default function DebugPage() {
           </div>
         ))}
       </dl>
-      <Link className="text-blue-600 underline" to="/list">
+      <Link className="text-primary underline" to="/list">
         ページ一覧へ
       </Link>
     </div>
