@@ -1,7 +1,9 @@
+import AuthForm from '../components/AuthForm'
+
 /**
  * @component
- * サインイン画面。
+ * サインアップ画面。
  */
 export default function Signup() {
-  return <h1>サインイン</h1>
+  return <AuthForm mode="signup" />
 }
