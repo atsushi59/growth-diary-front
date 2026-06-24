@@ -158,6 +158,10 @@ export default function AuthForm({ mode }: AuthFormProps) {
 
   /** 確認コードを再送する。 */
   async function handleResendCode() {
+    if (isSubmittingRef.current) return
+
+    isSubmittingRef.current = true
+    setIsSubmitting(true)
     setErrorMessage('')
     setNoticeMessage('')
     try {
@@ -165,7 +169,18 @@ export default function AuthForm({ mode }: AuthFormProps) {
       setNoticeMessage('確認コードを再送しました。')
     } catch (error) {
       setErrorMessage(toErrorMessage(error))
+    } finally {
+      isSubmittingRef.current = false
+      setIsSubmitting(false)
     }
+  }
+
+  /** 確認ステップからメール/パスワード入力へ戻る。打ち間違え時の修正用。 */
+  function handleBackToCredentials() {
+    setStep('credentials')
+    setConfirmationCode('')
+    setErrorMessage('')
+    setNoticeMessage('')
   }
 
   return (
@@ -215,6 +230,14 @@ export default function AuthForm({ mode }: AuthFormProps) {
               onClick={handleResendCode}
             >
               確認コードを再送する
+            </button>
+            <button
+              className="mt-2 w-full text-center text-sm text-muted-foreground underline disabled:opacity-50"
+              type="button"
+              disabled={isSubmitting}
+              onClick={handleBackToCredentials}
+            >
+              入力内容を修正する（戻る）
             </button>
           </>
         ) : (
