@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router'
 import './index.css'
+import './lib/amplify'
 
 import AuthLayout from './layouts/AuthLayout'
 import AppLayout from './layouts/AppLayout'
