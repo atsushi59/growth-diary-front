@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router'
 import './index.css'
 import './lib/amplify'
+import { SelectedChildProvider } from './contexts/SelectedChildProvider'
 
 import AuthLayout from './layouts/AuthLayout'
 import AppLayout from './layouts/AppLayout'
@@ -24,8 +25,9 @@ import UploadTest from './pages/UploadTest'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter>
-      <Routes>
+    <SelectedChildProvider>
+      <BrowserRouter>
+        <Routes>
         {/* 認証レイアウト（メニューボタンなし・認証不要） */}
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<Login />} />
@@ -52,7 +54,8 @@ createRoot(document.getElementById('root')!).render(
 
         {/* 未マッチ */}
         <Route path="*" element={<NotFound />} />
-      </Routes>
-    </BrowserRouter>
+        </Routes>
+      </BrowserRouter>
+    </SelectedChildProvider>
   </StrictMode>,
 )
