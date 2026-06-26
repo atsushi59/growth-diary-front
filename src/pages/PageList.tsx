@@ -14,6 +14,7 @@ const PAGE_LINKS = [
   { path: '/growth', label: '成長ページ' },
   { path: '/mypage', label: 'マイページ' },
   { path: '/debug', label: 'デバッグページ' },
+  { path: '/upload-test', label: '画像アップロード検証' },
 ]
 
 /**

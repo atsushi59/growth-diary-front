@@ -20,6 +20,7 @@ import MyPage from './pages/MyPage'
 import NotFound from './pages/NotFound'
 import PageList from './pages/PageList'
 import DebugPage from './pages/DebugPage'
+import UploadTest from './pages/UploadTest'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -47,6 +48,7 @@ createRoot(document.getElementById('root')!).render(
         {/* 検証用（メニューボタンなし・どのレイアウトにも属さない） */}
         <Route path="/list" element={<PageList />} />
         <Route path="/debug" element={<DebugPage />} />
+        <Route path="/upload-test" element={<UploadTest />} />
 
         {/* 未マッチ */}
         <Route path="*" element={<NotFound />} />
