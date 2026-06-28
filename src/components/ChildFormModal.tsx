@@ -39,34 +39,44 @@ export default function ChildFormModal({
   onClose,
   onSaved,
 }: ChildFormModalProps) {
+  // 編集時に既に登録されている画像の表示用 URL（無ければ null）。
+  const initialImageUrl = child?.imageUrl ?? null
   // 親側で開くたびに key を変えて再マウントするため、初期値は props から直接決める。
   const [name, setName] = useState(child?.name ?? '')
   const [gender, setGender] = useState(child?.gender ?? '')
   const [birthday, setBirthday] = useState(child?.birthday ?? '')
   const [imageFile, setImageFile] = useState<File | null>(null)
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(initialImageUrl)
   const [errorMessage, setErrorMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const isSubmittingRef = useRef(false)
   // 新規作成で作成済みの子供 id を保持する。画像保存で失敗して再送されたとき、
   // 子供を作り直さず更新に切り替えて二重作成を防ぐ。
   const createdChildIdRef = useRef<string | null>(null)
+  // 現在のプレビュー用 object URL。解放を ref で管理する。
+  const previewUrlRef = useRef<string | null>(null)
 
-  // プレビュー用 object URL を差し替え・破棄時に解放する（メモリリーク防止）。
+  // アンマウント時にプレビュー用 object URL を解放する（メモリリーク防止）。
+  // StrictMode で表示直前に解放されないよう、依存配列は空にする。
   useEffect(() => {
     return () => {
-      if (imagePreview) URL.revokeObjectURL(imagePreview)
+      if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current)
     }
-  }, [imagePreview])
+  }, [])
 
   const isEdit = mode === 'edit'
   const canSubmit =
     name.trim().length > 0 && gender.length > 0 && birthday.length > 0 && !isSubmitting
 
-  /** 選択した画像ファイルとプレビューを更新する。 */
+  /** 選択した画像ファイルとプレビューを更新する。クリア時は既存画像に戻す。 */
   function handleImageChange(file: File | null) {
+    // 直前のプレビュー URL（object URL のみ）を解放してから新しいものを作る。
+    if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current)
+    const objectUrl = file ? URL.createObjectURL(file) : null
+    previewUrlRef.current = objectUrl
     setImageFile(file)
-    setImagePreview(file ? URL.createObjectURL(file) : null)
+    // 新規選択時はそのプレビュー、クリア時は元の登録画像に戻す。
+    setImagePreview(objectUrl ?? initialImageUrl)
   }
 
   /**
@@ -174,7 +184,11 @@ export default function ChildFormModal({
 
         <div className="flex flex-col gap-1">
           <span className="text-sm font-medium text-foreground">写真</span>
-          <ImageUploader src={imagePreview} onChange={handleImageChange} />
+          <ImageUploader
+            src={imagePreview}
+            clearable={imageFile !== null}
+            onChange={handleImageChange}
+          />
         </div>
 
         {errorMessage && (

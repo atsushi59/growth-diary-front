@@ -4,6 +4,8 @@ type ImageUploaderProps = {
   // 表示するプレビュー画像の URL（未選択なら null）。親が File からの object URL を渡す。
   src: string | null
   onChange: (file: File | null) => void
+  // 「画像を削除」ボタンを出すか（新規選択を取り消したいときだけ true にする）。
+  clearable?: boolean
   isError?: boolean
   disabled?: boolean
 }
@@ -17,7 +19,13 @@ type ImageUploaderProps = {
  * @param isError エラー時の枠線色
  * @param disabled 操作不可にするか
  */
-export default function ImageUploader({ src, onChange, isError, disabled }: ImageUploaderProps) {
+export default function ImageUploader({
+  src,
+  onChange,
+  clearable = false,
+  isError,
+  disabled,
+}: ImageUploaderProps) {
   const fileInputElement = useRef<HTMLInputElement>(null)
 
   return (
@@ -39,13 +47,13 @@ export default function ImageUploader({ src, onChange, isError, disabled }: Imag
         )}
       </button>
 
-      {src && !disabled && (
+      {src && clearable && !disabled && (
         <button
           type="button"
           className="cursor-pointer text-sm text-destructive underline"
           onClick={() => onChange(null)}
         >
-          画像を削除
+          選び直す
         </button>
       )}
 

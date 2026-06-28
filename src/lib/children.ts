@@ -8,6 +8,8 @@ export type Child = {
   birthday: string
   gender: string
   image?: string | null
+  // 表示用の署名付き GET URL（バックが発行。画像が無ければ null）。
+  imageUrl?: string | null
   createdAt: string
   updatedAt: string
 }

@@ -33,8 +33,12 @@ export default function ChildCard({ child, isSelected, onSelect, onEdit }: Child
       ].join(' ')}
     >
       <div className="flex items-center gap-3">
-        <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-muted text-xs text-muted-foreground">
-          {child.image ? '写真' : '未設定'}
+        <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-xs text-muted-foreground">
+          {child.imageUrl ? (
+            <img src={child.imageUrl} alt={`${child.name}の写真`} className="size-full object-cover" />
+          ) : (
+            <span>未設定</span>
+          )}
         </div>
         <dl className="flex flex-col gap-0.5 text-sm">
           <div>
