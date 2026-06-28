@@ -83,7 +83,6 @@ export default function ChildrenHub() {
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-4 p-6">
-      <h1 className="text-2xl font-bold text-foreground">子供ページ</h1>
 
       {isLoading && <p className="text-sm text-muted-foreground">読み込み中...</p>}
       {loadError && (
