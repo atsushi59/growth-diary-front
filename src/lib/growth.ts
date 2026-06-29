@@ -1,5 +1,8 @@
 import { apiRequest } from './api'
 
+// 1年あたりの月数。月齢⇄年齢の換算で使う。
+export const MONTHS_PER_YEAR = 12
+
 // 成長記録（バックの Growth モデル）。height/weight はどちらか必須・もう一方は null 可。
 export type Growth = {
   id: string

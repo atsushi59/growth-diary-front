@@ -3,20 +3,40 @@ import { Link } from 'react-router'
 import GrowthChart from '../components/GrowthChart'
 import GrowthRecordModal from '../components/GrowthRecordModal'
 import Button from '../components/ui/Button'
+import Select, { type SelectOption } from '../components/ui/Select'
 import { getChild, type Child } from '../lib/children'
 import {
   listGrowths,
   listGrowthStandards,
   toAgeMonths,
+  MONTHS_PER_YEAR,
   type Growth as GrowthRecord,
   type GrowthStandards,
 } from '../lib/growth'
 import { useSelectedChild } from '../contexts/selectedChild'
 
-type ModalState = {
-  isOpen: boolean
-  mode: 'create' | 'edit'
-  record?: GrowthRecord
+// グラフで切り替えられる最大の年齢（歳）。発育曲線マスタは 0〜72ヶ月（6歳ちょうど）まで。
+const MAX_AGE_YEAR = 5
+const AGE_OPTIONS: SelectOption[] = Array.from({ length: MAX_AGE_YEAR + 1 }, (_, age) => ({
+  value: String(age),
+  label: `${age}歳`,
+}))
+
+/**
+ * 今日時点の満年齢（歳）を求め、グラフで表示できる範囲に丸める。
+ * 誕生日が今年まだ来ていなければ1つ引く（日まで考慮する）。
+ * @param birthday 子供の誕生日（YYYY-MM-DD）
+ * @returns 0〜MAX_AGE_YEAR に収めた満年齢（歳）
+ */
+function getCurrentAgeYear(birthday: string): number {
+  const [birthYear, birthMonth, birthDay] = birthday.split('-').map(Number)
+  const today = new Date()
+  let ageYear = today.getFullYear() - birthYear
+  const isBeforeBirthdayThisYear =
+    today.getMonth() + 1 < birthMonth ||
+    (today.getMonth() + 1 === birthMonth && today.getDate() < birthDay)
+  if (isBeforeBirthdayThisYear) ageYear--
+  return Math.min(Math.max(ageYear, 0), MAX_AGE_YEAR)
 }
 
 /**
@@ -52,7 +72,9 @@ function GrowthContent({ childId }: { childId: string }) {
   const [standards, setStandards] = useState<GrowthStandards | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
-  const [modalState, setModalState] = useState<ModalState>({ isOpen: false, mode: 'create' })
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  // グラフに表示する年齢（歳）。子供取得時に現在の年齢で初期化する。
+  const [ageYear, setAgeYear] = useState(0)
 
   // 子供・記録・マスタをまとめて取得する。setState は then/catch/finally（非同期）で行う。
   useEffect(() => {
@@ -63,6 +85,7 @@ function GrowthContent({ childId }: { childId: string }) {
         setChild(fetchedChild)
         setGrowths(fetchedGrowths)
         setStandards(fetchedStandards)
+        setAgeYear(getCurrentAgeYear(fetchedChild.birthday))
         setLoadError('')
       })
       .catch(() => {
@@ -85,50 +108,49 @@ function GrowthContent({ childId }: { childId: string }) {
     }
   }, [childId])
 
-  /** 追加ボタンを押したとき。 */
-  const handleAdd = useCallback(() => {
-    setModalState({ isOpen: true, mode: 'create', record: undefined })
-  }, [])
-
-  /** 一覧の編集を押したとき。 */
-  const handleEdit = useCallback((record: GrowthRecord) => {
-    setModalState({ isOpen: true, mode: 'edit', record })
+  /** 記録を入力ボタンを押したとき。 */
+  const handleOpenModal = useCallback(() => {
+    setIsModalOpen(true)
   }, [])
 
   /** モーダルを閉じる。 */
   const handleCloseModal = useCallback(() => {
-    setModalState((state) => ({ ...state, isOpen: false }))
+    setIsModalOpen(false)
   }, [])
 
-  // 帯（標準）データと記録データをグラフ用に整形する。
+  // 表示中の年齢の月齢範囲 [開始, 終了]（例: 1歳なら 12〜24ヶ月）。
+  const startMonth = ageYear * MONTHS_PER_YEAR
+  const endMonth = startMonth + MONTHS_PER_YEAR
+
+  // 帯（標準）データと記録データを、表示中の年齢に絞り込んでグラフ用に整形する。
   const heightBand = useMemo(
     () =>
-      (standards?.height ?? []).map((b) => ({
-        ageMonths: b.ageMonths,
-        band: [b.min, b.max] as [number, number],
-      })),
-    [standards],
+      (standards?.height ?? [])
+        .filter((b) => b.ageMonths >= startMonth && b.ageMonths <= endMonth)
+        .map((b) => ({ ageMonths: b.ageMonths, band: [b.min, b.max] as [number, number] })),
+    [standards, startMonth, endMonth],
   )
   const weightBand = useMemo(
     () =>
-      (standards?.weight ?? []).map((b) => ({
-        ageMonths: b.ageMonths,
-        band: [b.min, b.max] as [number, number],
-      })),
-    [standards],
+      (standards?.weight ?? [])
+        .filter((b) => b.ageMonths >= startMonth && b.ageMonths <= endMonth)
+        .map((b) => ({ ageMonths: b.ageMonths, band: [b.min, b.max] as [number, number] })),
+    [standards, startMonth, endMonth],
   )
   const heightRecords = useMemo(() => {
     if (!child) return []
     return growths
       .filter((g) => g.height != null)
       .map((g) => ({ ageMonths: toAgeMonths(child.birthday, g.recordedAt), value: g.height as number }))
-  }, [growths, child])
+      .filter((p) => p.ageMonths >= startMonth && p.ageMonths <= endMonth)
+  }, [growths, child, startMonth, endMonth])
   const weightRecords = useMemo(() => {
     if (!child) return []
     return growths
       .filter((g) => g.weight != null)
       .map((g) => ({ ageMonths: toAgeMonths(child.birthday, g.recordedAt), value: g.weight as number }))
-  }, [growths, child])
+      .filter((p) => p.ageMonths >= startMonth && p.ageMonths <= endMonth)
+  }, [growths, child, startMonth, endMonth])
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-4 p-6">
@@ -136,8 +158,8 @@ function GrowthContent({ childId }: { childId: string }) {
         <h1 className="text-2xl font-bold text-foreground">
           {child ? `${child.name} の成長記録` : '成長記録'}
         </h1>
-        <Button onClick={handleAdd} disabled={!child}>
-          記録を追加
+        <Button onClick={handleOpenModal} disabled={!child}>
+          記録を入力
         </Button>
       </div>
 
@@ -151,43 +173,28 @@ function GrowthContent({ childId }: { childId: string }) {
       {!isLoading && !loadError && standards && (
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <GrowthChart title="身長" unit="cm" band={heightBand} records={heightRecords} />
-            <GrowthChart title="体重" unit="kg" band={weightBand} records={weightRecords} />
+            <GrowthChart title="身長" unit="cm" band={heightBand} records={heightRecords} ageYear={ageYear} />
+            <GrowthChart title="体重" unit="kg" band={weightBand} records={weightRecords} ageYear={ageYear} />
           </div>
-
-          <h2 className="mt-2 text-sm font-bold text-foreground">記録一覧</h2>
-          {growths.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              まだ記録がありません。「記録を追加」から登録してください。
-            </p>
-          ) : (
-            <ul className="flex flex-col divide-y divide-border rounded-lg border border-border">
-              {growths.map((record) => (
-                <li key={record.id} className="flex items-center justify-between gap-2 p-3 text-sm">
-                  <span className="text-foreground">
-                    {record.recordedAt.slice(0, 7).replace('-', '/')}
-                    <span className="ml-3 text-muted-foreground">
-                      身長 {record.height ?? '-'} / 体重 {record.weight ?? '-'}
-                    </span>
-                  </span>
-                  <Button variant="secondary" size="small" onClick={() => handleEdit(record)}>
-                    編集
-                  </Button>
-                </li>
-              ))}
-            </ul>
-          )}
+          <div className="flex justify-center">
+            <div className="w-32">
+              <Select
+                options={AGE_OPTIONS}
+                value={String(ageYear)}
+                onChange={(value) => setAgeYear(Number(value))}
+              />
+            </div>
+          </div>
         </>
       )}
 
       {child && (
         <GrowthRecordModal
-          key={`${modalState.mode}:${modalState.record?.id ?? 'new'}:${modalState.isOpen}`}
-          isOpen={modalState.isOpen}
-          mode={modalState.mode}
+          key={String(isModalOpen)}
+          isOpen={isModalOpen}
           childId={child.id}
           birthday={child.birthday}
-          record={modalState.record}
+          records={growths}
           onClose={handleCloseModal}
           onSaved={refreshGrowths}
         />
