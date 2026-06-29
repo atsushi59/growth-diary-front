@@ -31,6 +31,15 @@ export function listChildren(): Promise<Child[]> {
 }
 
 /**
+ * 子供を1件取得する。
+ * @param id 子供の id
+ * @returns 子供
+ */
+export function getChild(id: string): Promise<Child> {
+  return apiRequest<Child>(`/children/${id}`)
+}
+
+/**
  * 子供を作成する。
  * @param input 作成する子供の入力
  * @returns 作成した子供
