@@ -64,7 +64,7 @@ export default function Consultation() {
       )}
 
       {response && (
-        <div className="flex flex-col gap-2 rounded-md border border-border bg-subtle p-4">
+        <div className="flex flex-col gap-2 rounded-md border border-border bg-surface p-4">
           <h2 className="text-sm font-semibold text-muted-foreground">回答</h2>
           <p className="whitespace-pre-wrap text-foreground">{response}</p>
         </div>
