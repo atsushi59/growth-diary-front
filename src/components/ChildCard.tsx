@@ -29,7 +29,7 @@ export default function ChildCard({ child, isSelected, onSelect, onEdit }: Child
     <div
       className={[
         'flex flex-col gap-3 rounded-lg border p-4',
-        isSelected ? 'border-primary bg-primary-50' : 'border-border bg-surface',
+        isSelected ? 'border-primary bg-primary-50 ring-2 ring-primary' : 'border-border bg-surface',
       ].join(' ')}
     >
       <div className="flex items-center gap-3">
